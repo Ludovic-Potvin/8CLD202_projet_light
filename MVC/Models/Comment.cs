@@ -22,7 +22,7 @@ namespace MVC.Models
         //
 
         [Key]
-        public int Id { get; init; }
+        public string Id { get; init; }
 
         [Required(ErrorMessage = "SVP entrer votre commentaire")]
         [MaxLength(128)]
@@ -81,10 +81,7 @@ namespace MVC.Models
             IsDeleted = true;
         }
 
-        // référence pour ForeignKey ...
-        public Post Post { get; set; } = null!;
-
-        public int PostId { get; set; }
+        public string PostId { get; set; }
 
         //public int? ParentCommentId { get; set; }
 

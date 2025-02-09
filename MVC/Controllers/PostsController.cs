@@ -21,10 +21,22 @@ namespace MVC.Controllers
         // GET: Posts
         public async Task<IActionResult> Index()
         {
-            // Ajout d'un "order by", pour trier les resultats
-            // Ajout d'un "take", pour prendre seulement une partie des entré, nous ferons une paginations plus tard.
-            // Ajout d'un include pour ajouter a notre collection les commentaires lier a notre Post.
-            return View(await _context.Posts.OrderByDescending(o => o.Created).Take(10).Include(i => i.Comments).ToListAsync());
+            var posts = await _context.Posts
+                               .OrderByDescending(o => o.Created)
+                               .Take(10)
+                               .ToListAsync();
+
+            var postIds = posts.Select(p => p.Id).ToList();
+            var comments = await _context.Comments
+                                          .Where(c => postIds.Contains(c.PostId))
+                                          .ToListAsync();
+
+            foreach (var post in posts)
+            {
+                post.Comments = comments.Where(c => c.PostId == post.Id).ToList();
+            }
+
+            return View(posts);
         }
 
         // GET: Posts/Create
@@ -74,7 +86,7 @@ namespace MVC.Controllers
         }
 
         // Function pour ajouter un like a un Post
-        public async Task<ActionResult> Like(int id)
+        public async Task<ActionResult> Like(string id)
         {
             // Utiliation du null-forgiving operator
             // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving
@@ -87,7 +99,7 @@ namespace MVC.Controllers
         }
 
         // Fonction pour ajouter un dislike a un Post
-        public async Task<ActionResult> Dislike(int id)
+        public async Task<ActionResult> Dislike(string id)
         {
             // Utiliation du null-forgiving operator
             // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving

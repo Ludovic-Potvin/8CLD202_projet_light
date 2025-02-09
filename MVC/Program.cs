@@ -10,32 +10,24 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+var cosmosConfig = builder.Configuration.GetRequiredSection("Cosmos");
+var accountEndpoint = cosmosConfig["AccountEndpoint"] ?? throw new InvalidOperationException("Cosmos AccountEndpoint is missing");
+var accountKey = cosmosConfig["AccountKey"] ?? throw new InvalidOperationException("Cosmos AccountKey is missing");
+var databaseName = cosmosConfig["DatabaseName"] ?? throw new InvalidOperationException("Cosmos DatabaseName is missing");
+
 // Ajouter la BD
-builder.Services.AddDbContext<ApplicationDbContext>(options => 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!)
-    .LogTo(Console.WriteLine, LogLevel.Trace)
-    .EnableDetailedErrors());
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseCosmos(accountEndpoint, accountKey, databaseName));
 
 var app = builder.Build();
 
-switch (builder.Configuration.GetValue<string>("DatabaseConfiguration")
+// Ensure Cosmos DB is created
+using (var scope = app.Services.CreateScope())
 {
-    case "SQL":
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbContext = app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContextSQL>();
-            dbContext.Database.EnsureDeleted();
-            dbContext.Database.EnsureCreated();
-        }
-        break;
-    case "NoSQL":
-        using (var scope = app.Services.CreateScope())
-        {
-            var dbContext = app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationDbContextNoSQL>();
-            await dbContext.Database.EnsureCreated();
-        }
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.EnsureCreatedAsync();
+    await dbContext.SeedDataAsync();
 }
-//dbContext.Database.Migrate();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

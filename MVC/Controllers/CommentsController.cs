@@ -19,7 +19,7 @@ namespace MVC.Controllers
         }
 
         // GET: Comments
-        public async Task<IActionResult> Index(int id)
+        public async Task<IActionResult> Index(string id)
         {
             return View(await _context.Comments.Where(w => w.PostId == id).ToListAsync());
         }
@@ -29,7 +29,7 @@ namespace MVC.Controllers
         // GET: Comments/Create/{PostId}{CommentId}
         // int PostId
         [HttpGet]
-        public IActionResult Create(int PostId)
+        public IActionResult Create(string PostId)
         {
             ViewData["PostId"] = PostId;
             return View();
@@ -60,7 +60,7 @@ namespace MVC.Controllers
         }
 
         // Function pour ajouter un like a un Comment
-        public async Task<ActionResult> Like(int CommentId, int PostId)
+        public async Task<ActionResult> Like(string CommentId, string PostId)
         {
             // Utiliation du null-forgiving operator
             // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving
@@ -75,7 +75,7 @@ namespace MVC.Controllers
         }
 
         // Fonction pour ajouter un dislike a un Comment
-        public async Task<ActionResult> Dislike(int CommentId, int PostId)
+        public async Task<ActionResult> Dislike(string CommentId, string PostId)
         {
             // Utiliation du null-forgiving operator
             // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-forgiving

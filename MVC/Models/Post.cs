@@ -41,7 +41,7 @@ namespace MVC.Models
         //
 
         [Key]
-        public int Id { get; init; }
+        public string Id { get; init; }
 
         [Required(ErrorMessage = "SVP entrer un titre que personne ne lira")]
         [MaxLength(128)]
@@ -74,7 +74,7 @@ namespace MVC.Models
 
         public required byte[] Image { get; set; }
 
-        public ICollection<Comment> Comments { get; private set; } = new List<Comment>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
         public override string ToString()
         {
